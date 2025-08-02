@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Model files (too large for git)
+checkpoints/*.pth
+checkpoints/*.pt
+
+# Uploads
+uploads/*.jpg
+uploads/*.jpeg
+uploads/*.png
+uploads/*.gif
+!uploads/sample.jpg
+!uploads/test_images/*.jpg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
