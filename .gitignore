@@ -73,3 +73,6 @@ trace.log
 # Mac system files
 .AppleDouble
 .LSOverride
+
+venv
+ai-service/venv
