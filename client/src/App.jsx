@@ -1,35 +1,37 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import Home from './pages/Home';
+import History from './pages/History';
+import Settings from './pages/Settings';
 
-function App() {
-  const [count, setCount] = useState(0)
-
+const App = () => {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <Router>
+      {/* Navbar */}
+      <nav className="bg-white shadow-md p-4 flex items-center justify-between">
+        <h1 className="text-xl font-bold text-blue-600">AI Media Analyzer</h1>
+        <div className="space-x-4">
+          <Link to="/" className="text-gray-700 hover:text-blue-600 transition">Home</Link>
+          <Link to="/history" className="text-gray-700 hover:text-blue-600 transition">History</Link>
+          <Link to="/settings" className="text-gray-700 hover:text-blue-600 transition">Settings</Link>
+        </div>
+      </nav>
 
-export default App
+      {/* Page Content */}
+      <main className="bg-gray-100 min-h-screen">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/history" element={<History />} />
+          <Route path="/settings" element={<Settings />} />
+        </Routes>
+      </main>
+
+      {/* Optional Footer */}
+      <footer className="text-center text-sm text-gray-500 p-4">
+        &copy; {new Date().getFullYear()} AI Media Analyzer. All rights reserved.
+      </footer>
+    </Router>
+  );
+};
+
+export default App;

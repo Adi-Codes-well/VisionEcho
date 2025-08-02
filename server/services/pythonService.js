@@ -1,6 +1,6 @@
-const dotenv = require('dotenv');
-const axios = require('axios');
-const FormData = require('form-data');
+const dotenv = require("dotenv");
+const axios = require("axios");
+const FormData = require("form-data");
 
 dotenv.config();
 
@@ -10,29 +10,33 @@ const PYTHON_BASE_URL = process.env.PYTHON_SERVICE_URL;
 const sendToPythonAI = async (fileBuffer, filename, command) => {
   try {
     const formData = new FormData();
-    formData.append('image', fileBuffer, filename);
-    formData.append('command', command);
+    formData.append("image", capturedImageBlob);
+    formData.append("command", voiceCommandText);
+    formData.append("save", true); // or false
+    formData.append("socketId", socket.id);
+
+    await axios.post(`${API_BASE_URL}/ai/analyze`, formData);
 
     // Decide which Python endpoint to call based on command
-    let endpoint = '/object-detection'; // default
+    let endpoint = "/object-detection"; // default
 
-    if (command.toLowerCase().includes('face')) {
-      endpoint = '/face-recognition';
-    } else if (command.toLowerCase().includes('medicine')) {
-      endpoint = '/medicine-ocr';
+    if (command.toLowerCase().includes("face")) {
+      endpoint = "/face-recognition";
+    } else if (command.toLowerCase().includes("medicine")) {
+      endpoint = "/medicine-ocr";
     }
 
     const url = `${PYTHON_BASE_URL}${endpoint}`;
 
     const response = await axios.post(url, formData, {
       headers: formData.getHeaders(),
-      timeout: 10000 // 10 seconds timeout
+      timeout: 10000, // 10 seconds timeout
     });
 
     return response.data; // JSON result from Python
   } catch (err) {
-    console.error('Error communicating with Python AI:', err.message);
-    throw new Error('AI processing failed');
+    console.error("Error communicating with Python AI:", err.message);
+    throw new Error("AI processing failed");
   }
 };
 
