@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import HistoryCard from '../components/HistoryCard';
-import mockHistory from '../data/mockHistory';
 
 const History = () => {
   const [search, setSearch] = useState('');

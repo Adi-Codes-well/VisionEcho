@@ -1,8 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Home from './pages/Home';
-import History from './pages/History';
-import Settings from './pages/Settings';
+import History from './pages/History'; // Keep this for backend integration later
 
 const App = () => {
   return (
@@ -13,7 +12,6 @@ const App = () => {
         <div className="space-x-4">
           <Link to="/" className="text-gray-700 hover:text-blue-600 transition">Home</Link>
           <Link to="/history" className="text-gray-700 hover:text-blue-600 transition">History</Link>
-          <Link to="/settings" className="text-gray-700 hover:text-blue-600 transition">Settings</Link>
         </div>
       </nav>
 
@@ -22,7 +20,6 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/history" element={<History />} />
-          <Route path="/settings" element={<Settings />} />
         </Routes>
       </main>
 
