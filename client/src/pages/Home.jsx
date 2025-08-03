@@ -1,37 +1,25 @@
-import React, { useEffect, useRef } from 'react';
-import VoiceCommandButton from '../components/VoiceCommandButton';
-import ResultDisplay from '../components/ResultDisplay';
+// src/pages/Home.jsx
+import { useNavigate } from "react-router-dom";
 
-const Home = () => {
-  const videoRef = useRef(null);
-
-  useEffect(() => {
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then((stream) => {
-        videoRef.current.srcObject = stream;
-      })
-      .catch((err) => {
-        console.error('Camera access error:', err);
-      });
-  }, []);
+function Home() {
+  const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 flex flex-col items-center">
-      <h1 className="text-2xl font-bold mb-4">AI Media Analyzer</h1>
+    <div className="min-h-screen flex flex-col justify-center items-center bg-black text-white px-6">
+      <h1 className="text-5xl font-bold mb-4 tracking-tight">VisionEcho</h1>
 
-      <div className="w-full max-w-md relative">
-        <video
-          ref={videoRef}
-          autoPlay
-          className="w-full rounded-lg border shadow-lg"
-          style={{ transform: 'scaleX(-1)' }}
-        />
-      </div>
+      <p className="text-lg text-gray-300 text-center max-w-xl mb-10">
+        Real-time visual assistant that helps blind and visually impaired individuals navigate and understand their surroundings using AI-powered object and text recognition.
+      </p>
 
-      <VoiceCommandButton videoRef={videoRef} />
-      <ResultDisplay />
+      <button
+        onClick={() => navigate("/assistant")}
+        className="bg-white text-black px-8 py-3 rounded-full text-lg font-medium tracking-wide shadow-md hover:bg-gray-200 transition"
+      >
+        Start Visual Assistance
+      </button>
     </div>
   );
-};
+}
 
 export default Home;
