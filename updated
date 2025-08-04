@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Vision Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .history-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .history-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 30px;
+        }
+        
+        .video-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 16/9;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #000;
+            display: none;
+        }
+        
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        canvas {
+            display: none;
+        }
+        
+        .video-placeholder {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .video-placeholder h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+            font-weight: 300;
+        }
+        
+        .video-placeholder p {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+        
+        .controls-section {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-width: 140px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .primary-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+        }
+        
+        .secondary-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .secondary-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .danger-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            box-shadow: 0 4px 16px rgba(255, 107, 107, 0.3);
+        }
+        
+        .voice-btn {
+            position: relative;
+            overflow: visible !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 80px;
+        }
+        
+        .voice-orb-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .voice-orb {
+            width: 40px;
+            height: 40px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .orb-outer {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 3px;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+            animation: orb-pulse 2s ease-in-out infinite;
+        }
+        
+        .orb-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #a855f7, #6366f1, #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .wave-form {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1px;
+        }
+        
+        .wave {
+            width: 2px;
+            background: linear-gradient(180deg, #ffffff, #e0e7ff);
+            border-radius: 1px;
+            animation: wave-dance 1.5s ease-in-out infinite;
+        }
+        
+        .wave1 { height: 8px; animation-delay: 0s; }
+        .wave2 { height: 12px; animation-delay: 0.2s; }
+        .wave3 { height: 16px; animation-delay: 0.4s; }
+        .wave4 { height: 12px; animation-delay: 0.6s; }
+        .wave5 { height: 8px; animation-delay: 0.8s; }
+        
+        .voice-btn.listening .orb-outer {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
+            animation: listening-pulse 0.8s ease-in-out infinite;
+        }
+        
+        .voice-btn.listening .orb-inner {
+            background: radial-gradient(circle at 30% 30%, #34d399, #10b981, #059669);
+        }
+        
+        .voice-btn.listening .wave {
+            animation-duration: 0.6s;
+            background: linear-gradient(180deg, #ffffff, #d1fae5);
+        }
+        
+        .voice-btn:disabled .orb-outer {
+            background: rgba(107, 114, 128, 0.5);
+            box-shadow: none;
+            animation: none;
+        }
+        
+        .voice-btn:disabled .orb-inner {
+            background: rgba(75, 85, 99, 0.7);
+        }
+        
+        .voice-btn:disabled .wave {
+            background: rgba(156, 163, 175, 0.6);
+            animation: none;
+        }
+        
+        .smart-sense-btn {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7, #7c3aed);
+            background-size: 200% 200%;
+            color: white;
+            box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
+            animation: smart-sense-gradient 3s ease infinite;
+            position: relative;
+        }
+        
+        .smart-sense-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .smart-sense-btn:hover::after {
+            opacity: 1;
+        }
+        
+        .smart-sense-btn.active {
+            background: linear-gradient(135deg, #10b981, #059669, #047857);
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+            animation: smart-sense-active 1s ease infinite alternate;
+        }
+        
+        @keyframes orb-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes listening-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes wave-dance {
+            0%, 100% { 
+                transform: scaleY(0.3);
+                opacity: 0.6;
+            }
+            50% { 
+                transform: scaleY(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes smart-sense-gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes smart-sense-active {
+            0% { box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4); }
+            100% { box-shadow: 0 6px 24px rgba(16, 185, 129, 0.6); }
+        }
+        
+        .status-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        .status {
+            font-size: 16px;
+            font-weight: 400;
+        }
+        
+        .status.loading {
+            color: #ffa726;
+        }
+        
+        .status.success {
+            color: #66bb6a;
+        }
+        
+        .status.error {
+            color: #ef5350;
+        }
+        
+        .description-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+        
+        .description-section h3 {
+            color: #667eea;
+            margin-bottom: 16px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .description-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .history-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        
+        .history-panel.open {
+            right: 0;
+        }
+        
+        .history-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .close-history {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .close-history:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .history-list {
+            padding: 20px;
+        }
+        
+        .history-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .history-timestamp {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 8px;
+        }
+        
+        .history-text {
+            font-size: 14px;
+            line-height: 1.4;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        @media (max-width: 768px) {
+            .controls-section {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                min-width: 200px;
+            }
+            
+            .history-panel {
+                width: 100vw;
+                right: -100vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">AI Vision Assistant</div>
+        <button class="history-btn" id="historyBtn">📋 History</button>
+    </div>
+    
+    <div class="main-container">
+        <div class="video-section">
+            <div class="video-container" id="videoContainer">
+                <video id="video" autoplay muted></video>
+                <canvas id="canvas"></canvas>
+            </div>
+            <div class="video-placeholder" id="videoPlaceholder">
+                <h3>Camera View</h3>
+                <p>Start your camera to see the live feed here</p>
+            </div>
+        </div>
+        
+        <div class="controls-section">
+            <button id="startCamera" class="btn primary-btn">🎥 Start Camera</button>
+            <button id="describeScene" class="btn secondary-btn voice-btn" disabled>
+                <div class="voice-orb-container">
+                    <div class="voice-orb">
+                        <div class="orb-outer">
+                            <div class="orb-inner">
+                                <div class="wave-form">
+                                    <div class="wave wave1"></div>
+                                    <div class="wave wave2"></div>
+                                    <div class="wave wave3"></div>
+                                    <div class="wave wave4"></div>
+                                    <div class="wave wave5"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </button>
+            <button id="continuousMode" class="btn smart-sense-btn" disabled>🧠 AI Smart Sense</button>
+            <button id="stopSpeaking" class="btn danger-btn">🔇 Stop Speaking</button>
+        </div>
+        
+        <div class="status-section">
+            <div id="status" class="status">Ready to start. Click "Start Camera" to begin.</div>
+        </div>
+        
+        <div id="description" class="description-section">
+            <h3>Scene Description</h3>
+            <p id="descriptionText" class="description-text"></p>
+        </div>
+    </div>
+    
+    <div class="history-panel" id="historyPanel">
+        <div class="history-header">
+            <div class="history-title">Recent Descriptions</div>
+            <button class="close-history" id="closeHistory">×</button>
+        </div>
+        <div class="history-list" id="historyList">
+            <p style="color: rgba(255, 255, 255, 0.5); text-align: center; padding: 20px;">No descriptions yet</p>
+        </div>
+    </div>
+
+    <script>
+        class AIVisionAssistant {
+            constructor() {
+                this.video = document.getElementById('video');
+                this.canvas = document.getElementById('canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.status = document.getElementById('status');
+                this.description = document.getElementById('description');
+                this.descriptionText = document.getElementById('descriptionText');
+                this.videoContainer = document.getElementById('videoContainer');
+                this.videoPlaceholder = document.getElementById('videoPlaceholder');
+                
+                this.startCameraBtn = document.getElementById('startCamera');
+                this.describeSceneBtn = document.getElementById('describeScene');
+                this.continuousModeBtn = document.getElementById('continuousMode');
+                this.stopSpeakingBtn = document.getElementById('stopSpeaking');
+                this.historyBtn = document.getElementById('historyBtn');
+                this.historyPanel = document.getElementById('historyPanel');
+                this.closeHistory = document.getElementById('closeHistory');
+                this.historyList = document.getElementById('historyList');
+                
+                this.stream = null;
+                this.continuousInterval = null;
+                this.speechSynthesis = window.speechSynthesis;
+                this.isDescribing = false;
+                this.history = [];
+                
+                this.initializeEventListeners();
+            }
+            
+            initializeEventListeners() {
+                this.startCameraBtn.addEventListener('click', () => this.startCamera());
+                this.describeSceneBtn.addEventListener('click', () => this.describeScene());
+                this.continuousModeBtn.addEventListener('click', () => this.toggleContinuousMode());
+                this.stopSpeakingBtn.addEventListener('click', () => this.stopSpeaking());
+                this.historyBtn.addEventListener('click', () => this.toggleHistory());
+                this.closeHistory.addEventListener('click', () => this.toggleHistory());
+            }
+            
+            async startCamera() {
+                try {
+                    this.updateStatus('Starting camera...', 'loading');
+                    
+                    this.stream = await navigator.mediaDevices.getUserMedia({
+                        video: { 
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 },
+                            facingMode: 'environment'
+                        }
+                    });
+                    
+                    this.video.srcObject = this.stream;
+                    
+                    this.video.onloadedmetadata = () => {
+                        this.canvas.width = this.video.videoWidth;
+                        this.canvas.height = this.video.videoHeight;
+                        
+                        this.videoPlaceholder.style.display = 'none';
+                        this.videoContainer.style.display = 'block';
+                        
+                        this.updateStatus('Camera ready! You can now describe scenes.', 'success');
+                        this.startCameraBtn.disabled = true;
+                        this.describeSceneBtn.disabled = false;
+                        this.continuousModeBtn.disabled = false;
+                        
+                        this.speak('Camera is ready. You can now describe scenes.');
+                    };
+                    
+                } catch (error) {
+                    console.error('Camera error:', error);
+                    this.updateStatus('Camera access denied or not available. Please check permissions.', 'error');
+                    this.speak('Camera access failed. Please check your permissions and try again.');
+                }
+            }
+            
+            captureImage() {
+                this.ctx.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+                return this.canvas.toDataURL('image/jpeg', 0.8);
+            }
+            
+            async describeScene() {
+                if (this.isDescribing) return;
+                
+                try {
+                    this.isDescribing = true;
+                    this.describeSceneBtn.classList.add('listening');
+                    this.updateStatus('Analyzing scene...', 'loading');
+                    
+                    const imageData = this.captureImage();
+                    const description = await this.analyzeImage(imageData);
+                    
+                    this.showDescription(description);
+                    this.addToHistory(description);
+                    this.speak(description);
+                    
+                    this.updateStatus('Scene analyzed successfully!', 'success');
+                    
+                } catch (error) {
+                    console.error('Description error:', error);
+                    this.updateStatus('Failed to analyze scene. Please try again.', 'error');
+                    this.speak('Sorry, I could not analyze the scene. Please try again.');
+                } finally {
+                    this.isDescribing = false;
+                    this.describeSceneBtn.classList.remove('listening');
+                }
+            }
+            
+            async analyzeImage(imageData) {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        const aiResponses = [
+                            "Hello! I can see you're in a bright indoor space. There's a table in front of you with what looks like a laptop and maybe a coffee cup. The lighting is really good here - perfect for getting things done!",
+                            "Hi there! I'm looking at an outdoor scene for you. I can see some beautiful greenery and trees in the background. The ground appears to be a walkway or path. It's a lovely day to be outside!",
+                            "Hey! I notice you're looking at some text or reading material. The contrast looks great and the text appears clear. Would you like me to help you read this, or are you using another tool for that?",
+                            "I can see there are people in your view! They seem to be in a casual, friendly setting. Everyone looks relaxed and comfortable. It's nice to see people gathering together.",
+                            "I'm looking at what appears to be your workspace or desk area. I can make out several everyday items - looks like you might have your phone, some papers, and other useful things within reach. Everything seems well organized!"
+                        ];
+                        
+                        const randomResponse = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+                        resolve(randomResponse + " Remember, I'm your AI vision assistant and I'm here to help you navigate your world!");
+                    }, 2000);
+                });
+            }
+            
+            toggleContinuousMode() {
+                if (this.continuousInterval) {
+                    clearInterval(this.continuousInterval);
+                    this.continuousInterval = null;
+                    this.continuousModeBtn.innerHTML = '🧠 AI Smart Sense';
+                    this.continuousModeBtn.className = 'btn smart-sense-btn';
+                    this.updateStatus('AI Smart Sense stopped.', 'success');
+                    this.speak('AI Smart Sense stopped.');
+                } else {
+                    this.continuousInterval = setInterval(() => {
+                        if (!this.isDescribing) {
+                            this.describeScene();
+                        }
+                    }, 10000);
+                    
+                    this.continuousModeBtn.innerHTML = '⏹️ Stop Smart Sense';
+                    this.continuousModeBtn.className = 'btn smart-sense-btn active';
+                    this.updateStatus('AI Smart Sense activated. Intelligently analyzing surroundings every 10 seconds.', 'success');
+                    this.speak('AI Smart Sense activated. I will intelligently analyze what I see every 10 seconds.');
+                }
+            }
+            
+            speak(text) {
+                this.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+                
+                const voices = this.speechSynthesis.getVoices();
+                const preferredVoice = voices.find(voice => 
+                    voice.lang.startsWith('en') && voice.name.includes('Natural')
+                ) || voices.find(voice => voice.lang.startsWith('en'));
+                
+                if (preferredVoice) {
+                    utterance.voice = preferredVoice;
+                }
+                
+                this.speechSynthesis.speak(utterance);
+            }
+            
+            stopSpeaking() {
+                this.speechSynthesis.cancel();
+                this.updateStatus('Speech stopped.', 'success');
+            }
+            
+            showDescription(text) {
+                this.descriptionText.textContent = text;
+                this.description.style.display = 'block';
+            }
+            
+            addToHistory(description) {
+                const timestamp = new Date().toLocaleString();
+                this.history.unshift({ timestamp, description });
+                
+                // Keep only last 10 items
+                if (this.history.length > 10) {
+                    this.history = this.history.slice(0, 10);
+                }
+                
+                this.updateHistoryDisplay();
+            }
+            
+            updateHistoryDisplay() {
+                if (this.history.length === 0) {
+                    this.historyList.innerHTML = '<p style="color: rgba(255, 255, 255, 0.5); text-align: center; padding: 20px;">No descriptions yet</p>';
+                    return;
+                }
+                
+                this.historyList.innerHTML = this.history.map(item => `
+                    <div class="history-item">
+                        <div class="history-timestamp">${item.timestamp}</div>
+                        <div class="history-text">${item.description}</div>
+                    </div>
+                `).join('');
+            }
+            
+            toggleHistory() {
+                this.historyPanel.classList.toggle('open');
+            }
+            
+            updateStatus(message, type = '') {
+                this.status.textContent = message;
+                this.status.className = `status ${type}`;
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            new AIVisionAssistant();
+        });
+        
+        window.speechSynthesis.addEventListener('voiceschanged', () => {
+            // Voices are now loaded
+        });
+    </script>
+</body>
+</html>
