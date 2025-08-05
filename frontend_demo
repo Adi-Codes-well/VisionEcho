@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Vision Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: white;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
+        
+        .camera-container {
+            position: relative;
+            margin: 20px 0;
+            background: #333;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        video {
+            width: 100%;
+            max-width: 640px;
+            height: auto;
+            border-radius: 10px;
+            background: #222;
+        }
+        
+        canvas {
+            display: none;
+        }
+        
+        .controls {
+            margin: 30px 0;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 150px;
+        }
+        
+        .primary-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+        
+        .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+        }
+        
+        .secondary-btn {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+            color: white;
+        }
+        
+        .secondary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+        }
+        
+        .stop-btn {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+            color: white;
+        }
+        
+        .stop-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+        }
+        
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: #333;
+            font-size: 18px;
+        }
+        
+        .description {
+            margin: 20px 0;
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+            text-align: left;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .error {
+            background: #d32f2f;
+            color: white;
+        }
+        
+        .loading {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .success {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .visual-guide {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .guide-item {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .guide-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin: 0 auto 15px;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .guide-item h4 {
+            color: white;
+            margin: 15px 0 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .guide-item p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            line-height: 1.4;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Vision Assistant</h1>
+        
+        <div class="visual-guide">
+            <div class="guide-grid">
+                <div class="guide-item">
+                    <div class="icon-circle camera-icon">📷</div>
+                    <h4>Point & Capture</h4>
+                    <p>Aim your device at any object or scene</p>
+                </div>
+                <div class="guide-item">
+                    <div class="icon-circle voice-icon">🔊</div>
+                    <h4>Listen & Learn</h4>
+                    <p>Get instant audio descriptions</p>
+                </div>
+                <div class="guide-item">
+                    <div class="icon-circle auto-icon">🔄</div>
+                    <h4>Auto Mode</h4>
+                    <p>Continuous scene monitoring</p>
+                </div>
+                <div class="guide-item">
+                    <div class="icon-circle light-icon">💡</div>
+                    <h4>Best Results</h4>
+                    <p>Use in well-lit environments</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="camera-container" style="display: none;">
+            <video id="video" autoplay muted></video>
+            <canvas id="canvas"></canvas>
+        </div>
+        
+        <div class="controls">
+            <button id="startCamera" class="primary-btn">Start Camera</button>
+            <button id="describeScene" class="secondary-btn" disabled>🤖 Ask AI What's Here</button>
+            <button id="continuousMode" class="secondary-btn" disabled>🎙️ AI Voice Guide</button>
+            <button id="stopSpeaking" class="stop-btn">Stop Speaking</button>
+        </div>
+        
+        <div id="status" class="status">Ready to start. Click "Start Camera" to begin.</div>
+        
+        <div id="description" class="description" style="display: none;">
+            <h3>Scene Description:</h3>
+            <p id="descriptionText"></p>
+        </div>
+    </div>
+
+    <script>
+        class AIVisionAssistant {
+            constructor() {
+                this.video = document.getElementById('video');
+                this.canvas = document.getElementById('canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.status = document.getElementById('status');
+                this.description = document.getElementById('description');
+                this.descriptionText = document.getElementById('descriptionText');
+                
+                this.startCameraBtn = document.getElementById('startCamera');
+                this.describeSceneBtn = document.getElementById('describeScene');
+                this.continuousModeBtn = document.getElementById('continuousMode');
+                this.stopSpeakingBtn = document.getElementById('stopSpeaking');
+                
+                this.stream = null;
+                this.continuousInterval = null;
+                this.speechSynthesis = window.speechSynthesis;
+                this.isDescribing = false;
+                
+                this.initializeEventListeners();
+            }
+            
+            initializeEventListeners() {
+                this.startCameraBtn.addEventListener('click', () => this.startCamera());
+                this.describeSceneBtn.addEventListener('click', () => this.describeScene());
+                this.continuousModeBtn.addEventListener('click', () => this.toggleContinuousMode());
+                this.stopSpeakingBtn.addEventListener('click', () => this.stopSpeaking());
+            }
+            
+            async startCamera() {
+                try {
+                    this.updateStatus('Starting camera...', 'loading');
+                    
+                    this.stream = await navigator.mediaDevices.getUserMedia({
+                        video: { 
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 },
+                            facingMode: 'environment' // Use back camera on mobile
+                        }
+                    });
+                    
+                    this.video.srcObject = this.stream;
+                    
+                    this.video.onloadedmetadata = () => {
+                        this.canvas.width = this.video.videoWidth;
+                        this.canvas.height = this.video.videoHeight;
+                        
+                        // Show camera container when ready
+                        document.querySelector('.camera-container').style.display = 'block';
+                        
+                        this.updateStatus('Camera ready! You can now describe scenes.', 'success');
+                        this.startCameraBtn.disabled = true;
+                        this.describeSceneBtn.disabled = false;
+                        this.continuousModeBtn.disabled = false;
+                        
+                        this.speak('Camera is ready. You can now describe scenes.');
+                    };
+                    
+                } catch (error) {
+                    console.error('Camera error:', error);
+                    this.updateStatus('Camera access denied or not available. Please check permissions.', 'error');
+                    this.speak('Camera access failed. Please check your permissions and try again.');
+                }
+            }
+            
+            captureImage() {
+                this.ctx.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+                return this.canvas.toDataURL('image/jpeg', 0.8);
+            }
+            
+            async describeScene() {
+                if (this.isDescribing) return;
+                
+                try {
+                    this.isDescribing = true;
+                    this.updateStatus('Analyzing scene...', 'loading');
+                    
+                    const imageData = this.captureImage();
+                    const description = await this.analyzeImage(imageData);
+                    
+                    this.showDescription(description);
+                    this.speak(description);
+                    
+                    this.updateStatus('Scene analyzed successfully!', 'success');
+                    
+                } catch (error) {
+                    console.error('Description error:', error);
+                    this.updateStatus('Failed to analyze scene. Please try again.', 'error');
+                    this.speak('Sorry, I could not analyze the scene. Please try again.');
+                } finally {
+                    this.isDescribing = false;
+                }
+            }
+            
+            async analyzeImage(imageData) {
+                // Simulate AI vision analysis with more conversational responses
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        const aiResponses = [
+                            "Hello! I can see you're in a bright indoor space. There's a table in front of you with what looks like a laptop and maybe a coffee cup. The lighting is really good here - perfect for getting things done!",
+                            "Hi there! I'm looking at an outdoor scene for you. I can see some beautiful greenery and trees in the background. The ground appears to be a walkway or path. It's a lovely day to be outside!",
+                            "Hey! I notice you're looking at some text or reading material. The contrast looks great and the text appears clear. Would you like me to help you read this, or are you using another tool for that?",
+                            "I can see there are people in your view! They seem to be in a casual, friendly setting. Everyone looks relaxed and comfortable. It's nice to see people gathering together.",
+                            "I'm looking at what appears to be your workspace or desk area. I can make out several everyday items - looks like you might have your phone, some papers, and other useful things within reach. Everything seems well organized!"
+                        ];
+                        
+                        const randomResponse = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+                        resolve(randomResponse + " Remember, I'm your AI vision assistant and I'm here to help you navigate your world!");
+                    }, 2000);
+                });
+            }
+            
+            toggleContinuousMode() {
+                if (this.continuousInterval) {
+                    clearInterval(this.continuousInterval);
+                    this.continuousInterval = null;
+                    this.continuousModeBtn.textContent = 'Continuous Mode';
+                    this.continuousModeBtn.className = 'secondary-btn';
+                    this.updateStatus('Continuous mode stopped.', 'success');
+                    this.speak('Continuous mode stopped.');
+                } else {
+                    this.continuousInterval = setInterval(() => {
+                        if (!this.isDescribing) {
+                            this.describeScene();
+                        }
+                    }, 10000);
+                    
+                    this.continuousModeBtn.innerHTML = '⏹️ Stop AI Guide';
+                    this.continuousModeBtn.className = 'stop-btn';
+                    this.updateStatus('AI Voice Guide activated. Your personal assistant is now describing your surroundings.', 'success');
+                    this.speak('AI Voice Guide activated. I am now your personal vision assistant and will describe what I see every 10 seconds.');
+                }
+            }
+            
+            speak(text) {
+                this.speechSynthesis.cancel(); // Stop any current speech
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+                
+                // Try to use a more natural voice if available
+                const voices = this.speechSynthesis.getVoices();
+                const preferredVoice = voices.find(voice => 
+                    voice.lang.startsWith('en') && voice.name.includes('Natural')
+                ) || voices.find(voice => voice.lang.startsWith('en'));
+                
+                if (preferredVoice) {
+                    utterance.voice = preferredVoice;
+                }
+                
+                this.speechSynthesis.speak(utterance);
+            }
+            
+            stopSpeaking() {
+                this.speechSynthesis.cancel();
+                this.updateStatus('Speech stopped.', 'success');
+            }
+            
+            showDescription(text) {
+                this.descriptionText.textContent = text;
+                this.description.style.display = 'block';
+            }
+            
+            updateStatus(message, type = '') {
+                this.status.textContent = message;
+                this.status.className = `status ${type}`;
+            }
+        }
+        
+        // Initialize the application when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new AIVisionAssistant();
+        });
+        
+        // Load voices for speech synthesis
+        window.speechSynthesis.addEventListener('voiceschanged', () => {
+            // Voices are now loaded
+        });
+    </script>
+</body>
+</html>
